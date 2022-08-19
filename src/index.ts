@@ -10,8 +10,8 @@ wss.on('connection', async function connection(ws) {
     ws.send("SERVER: Connection established.");
     while(true){
         await new Promise(resolve => setTimeout(resolve, 3000));
-        let date = JSON.stringify(new Date());
-        console.log("sending: %s", date);
-        ws.send(`SERVER MESSAGE: ${date}`);
+        let msg = `SERVER SENT: ${JSON.stringify(new Date())}`;
+        console.log("sending: %s", msg);
+        ws.send(msg);
     }
 });
