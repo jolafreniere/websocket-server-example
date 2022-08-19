@@ -11,8 +11,12 @@ wss.on('connection', async function connection(ws) {
 
     ws.on('message', function incoming(message) {
         console.log('received: %s', message);
+
         if(message.toString().indexOf("exit") > -1){
             console.log("Received exit command, closing server...");
+            wss.clients.forEach((socket) => {
+                socket.close();
+            });
             process.exit(0);
         }
     });
@@ -25,14 +29,20 @@ wss.on('connection', async function connection(ws) {
 
     while(messagesSent++ < MESSAGES_PER_CONNECTION){
         await new Promise(resolve => setTimeout(resolve, 2987 + Math.random() * 1000));
-        let msg = `[SERVER] Sending to connection #${connectionId}: Server Message #${messagesSent}`;
-        console.log("sending: %s", msg);
-        ws.send(msg);
+        if(ws.readyState == 3) {
+            console.log(`Connection #${connectionId} has been closed by the client.`);
+            ws.close();
+            return;
+        }
 
         if(messagesSent == MESSAGES_PER_CONNECTION){
             ws.close();
             return;
         }
+
+        let msg = `[SERVER] Sending to connection #${connectionId}: Server Message #${messagesSent}`;
+        console.log("sending: %s", msg);
+        ws.send(msg);
     }
 
 });
